@@ -1,14 +1,1 @@
-# Dependencies
-node_modules/
-.DS_Store
 
-# Env files
-
-
-# Build outputs
-dist/
-build/
-
-# IDE files
-.vscode/
-.idea/
