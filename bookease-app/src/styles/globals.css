@@ -1,0 +1,150 @@
+/* ============================================================
+   GLOBAL STYLES — Variables, Reset, Base Typography
+   ============================================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* Colors */
+  --bg:          #f7f6f3;
+  --surface:     #ffffff;
+  --surface-2:   #f2f1ee;
+  --surface-3:   #e8e6e1;
+  --border:      #e0ddd6;
+  --border-2:    #ccc9c1;
+
+  --ink:         #1a1916;
+  --ink-2:       #3d3b35;
+  --ink-3:       #6b6860;
+  --ink-4:       #9b9890;
+
+  --teal:        #1a7a6e;
+  --teal-2:      #22a08f;
+  --teal-dim:    rgba(26, 122, 110, 0.1);
+  --teal-glow:   rgba(26, 122, 110, 0.2);
+
+  --amber:       #c47b2b;
+  --amber-2:     #e8952e;
+  --amber-dim:   rgba(196, 123, 43, 0.1);
+
+  --rose:        #c4433a;
+  --rose-dim:    rgba(196, 67, 58, 0.1);
+
+  --sky:         #2d72b8;
+  --sky-dim:     rgba(45, 114, 184, 0.1);
+
+  /* Radii */
+  --radius:      12px;
+  --radius-sm:   8px;
+  --radius-lg:   18px;
+
+  /* Shadows */
+  --shadow:      0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.06);
+  --shadow-lg:   0 4px 24px rgba(0,0,0,.10), 0 12px 48px rgba(0,0,0,.08);
+  --shadow-xl:   0 8px 32px rgba(0,0,0,.14), 0 24px 64px rgba(0,0,0,.10);
+
+  /* Typography */
+  --font-display: 'Inter', sans-serif;
+  --font-body:    'Inter', sans-serif;
+
+  /* Transitions */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --transition: all 0.18s var(--ease);
+}
+
+html {
+  font-size: 14px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+input,
+select,
+textarea,
+button {
+  font-family: var(--font-body);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+input[type="date"],
+input[type="time"] {
+  color-scheme: light;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar        { width: 5px; height: 5px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  { background: var(--border-2); border-radius: 99px; }
+
+/* Animations */
+@keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeUp  { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes scaleIn { from { opacity: 0; transform: scale(0.94); } to { opacity: 1; transform: scale(1); } }
+@keyframes spin    { to { transform: rotate(360deg); } }
+@keyframes toastIn { from { opacity: 0; transform: translateX(110%); } to { opacity: 1; transform: translateX(0); } }
+
+.fade-up  { animation: fadeUp  0.4s var(--ease) both; }
+.fade-in  { animation: fadeIn  0.3s ease both; }
+.scale-in { animation: scaleIn 0.25s var(--ease) both; }
+
+/* Stagger helpers */
+.d1 { animation-delay: 0.05s; }
+.d2 { animation-delay: 0.10s; }
+.d3 { animation-delay: 0.15s; }
+.d4 { animation-delay: 0.20s; }
+
+/* Layout helpers */
+.flex-between { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.flex-center  { display: flex; align-items: center; gap: 8px; }
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 680px) { .grid-2 { grid-template-columns: 1fr; } }
+@media (max-width: 760px) { .grid-3 { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 480px) { .grid-3 { grid-template-columns: 1fr; } }
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+@media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+
+/* Spacing */
+.mb-12 { margin-bottom: 12px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-20 { margin-bottom: 20px; }
+.mb-24 { margin-bottom: 24px; }
+
+/* Text helpers */
+.text-muted  { color: var(--ink-3); }
+.text-small  { font-size: 0.78rem; }
+.text-xs     { font-size: 0.72rem; }
+.font-display { font-family: var(--font-display); }
