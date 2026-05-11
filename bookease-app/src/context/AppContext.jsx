@@ -19,10 +19,10 @@ export function AppProvider({ children }) {
       // 1. Fetch DB state
       try {
         const [servRes, bookRes, setRes, userRes] = await Promise.all([
-          fetch('http://localhost:5000/api/services'),
-          fetch('http://localhost:5000/api/bookings'),
-          fetch('http://localhost:5000/api/settings'),
-          fetch('http://localhost:5000/api/users')
+          fetch('/api/services'),
+          fetch('/api/bookings'),
+          fetch('/api/settings'),
+          fetch('/api/users')
         ])
         
         const services = servRes.ok ? await servRes.json() : []
@@ -40,7 +40,7 @@ export function AppProvider({ children }) {
       const session = loadSession()
       if (session) {
         try {
-          const res = await fetch(`http://localhost:5000/api/users/${session.userId}`);
+          const res = await fetch(`/api/users/${session.userId}`);
           if (res.ok) {
             const user = await res.json();
             setCurrentUser(user);
@@ -72,7 +72,7 @@ export function AppProvider({ children }) {
     try {
       switch (action.type) {
         case 'ADD_BOOKING':
-          await fetch('http://localhost:5000/api/bookings', {
+          await fetch('/api/bookings', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(action.payload)
@@ -80,7 +80,7 @@ export function AppProvider({ children }) {
           setDb(prev => ({ ...prev, bookings: [...prev.bookings, action.payload] }))
           break
         case 'UPDATE_BOOKING':
-          await fetch(`http://localhost:5000/api/bookings/${action.id}`, {
+          await fetch(`/api/bookings/${action.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(action.payload)
@@ -88,12 +88,12 @@ export function AppProvider({ children }) {
           setDb(prev => ({ ...prev, bookings: prev.bookings.map(b => b.id === action.id ? { ...b, ...action.payload } : b) }))
           break
         case 'DELETE_BOOKING':
-          await fetch(`http://localhost:5000/api/bookings/${action.id}`, { method: 'DELETE' })
+          await fetch(`/api/bookings/${action.id}`, { method: 'DELETE' })
           setDb(prev => ({ ...prev, bookings: prev.bookings.filter(b => b.id !== action.id) }))
           break
 
         case 'ADD_SERVICE':
-          await fetch('http://localhost:5000/api/services', {
+          await fetch('/api/services', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(action.payload)
@@ -101,7 +101,7 @@ export function AppProvider({ children }) {
           setDb(prev => ({ ...prev, services: [...prev.services, action.payload] }))
           break
         case 'UPDATE_SERVICE':
-          await fetch(`http://localhost:5000/api/services/${action.id}`, {
+          await fetch(`/api/services/${action.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(action.payload)
@@ -109,12 +109,12 @@ export function AppProvider({ children }) {
           setDb(prev => ({ ...prev, services: prev.services.map(s => s.id === action.id ? { ...s, ...action.payload } : s) }))
           break
         case 'DELETE_SERVICE':
-          await fetch(`http://localhost:5000/api/services/${action.id}`, { method: 'DELETE' })
+          await fetch(`/api/services/${action.id}`, { method: 'DELETE' })
           setDb(prev => ({ ...prev, services: prev.services.filter(s => s.id !== action.id) }))
           break
 
         case 'UPDATE_USER':
-          await fetch(`http://localhost:5000/api/users/${action.id}`, {
+          await fetch(`/api/users/${action.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(action.payload)
@@ -126,7 +126,7 @@ export function AppProvider({ children }) {
           break
           
         case 'UPDATE_SETTINGS':
-          await fetch('http://localhost:5000/api/settings', {
+          await fetch('/api/settings', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ ...db.settings, ...action.payload })

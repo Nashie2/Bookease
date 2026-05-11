@@ -28,7 +28,7 @@ export default function AuthScreen({ hint, onBack }) {
       const user = result.user
 
       // Sync with our backend
-      const res = await fetch('http://localhost:5000/api/auth/social', {
+      const res = await fetch('/api/auth/social', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -86,7 +86,7 @@ export default function AuthScreen({ hint, onBack }) {
     try {
       if (tab === 'login') {
         // Login API call
-        const res = await fetch('http://localhost:5000/api/auth/login', {
+        const res = await fetch('/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: form.email, password: form.password })
@@ -131,7 +131,7 @@ export default function AuthScreen({ hint, onBack }) {
           created: new Date().toISOString().slice(0, 10),
         }
 
-        const res = await fetch('http://localhost:5000/api/auth/register', {
+        const res = await fetch('/api/auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(newUserReq)
