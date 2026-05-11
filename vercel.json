@@ -18,8 +18,12 @@
     },
     { "handle": "filesystem" },
     {
+      "src": "/assets/(.*)",
+      "dest": "/bookease-app/assets/$1"
+    },
+    {
       "src": "/(.*)",
-      "dest": "/index.html"
+      "dest": "/bookease-app/index.html"
     }
   ]
 }
