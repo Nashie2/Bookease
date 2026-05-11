@@ -24,7 +24,7 @@ app.get('/api/users', async (req, res) => {
         res.json(rows);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: `Backend Error: ${err.message}` });
     }
 });
 
@@ -35,7 +35,7 @@ app.get('/api/users/:id', async (req, res) => {
         res.json(rows[0]);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: `Backend Error: ${err.message}` });
     }
 });
 
@@ -59,7 +59,7 @@ app.put('/api/users/:id', async (req, res) => {
         res.json({ success: true });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: `Backend Error: ${err.message}` });
     }
 });
 
@@ -120,7 +120,7 @@ app.post('/api/auth/login', async (req, res) => {
         res.json(rows[0]);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: `Backend Error: ${err.message}` });
     }
 });
 
@@ -147,7 +147,7 @@ app.post('/api/auth/social', async (req, res) => {
         res.status(201).json({ id, first, last, email, role: role || 'user', avatar });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: `Backend Error: ${err.message}` });
     }
 });
 
@@ -172,7 +172,7 @@ app.post('/api/auth/register', async (req, res) => {
         res.status(201).json({ id, first, last, email, phone, role: role || 'user' });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: `Backend Error: ${err.message}` });
     }
 });
 
@@ -189,7 +189,7 @@ app.get('/api/services', async (req, res) => {
         res.json(mapped);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: `Backend Error: ${err.message}` });
     }
 });
 
@@ -203,7 +203,7 @@ app.post('/api/services', async (req, res) => {
         res.status(201).json({ success: true });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: `Backend Error: ${err.message}` });
     }
 });
 
@@ -228,7 +228,7 @@ app.put('/api/services/:id', async (req, res) => {
         res.json({ success: true });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: `Backend Error: ${err.message}` });
     }
 });
 
@@ -238,7 +238,7 @@ app.delete('/api/services/:id', async (req, res) => {
         res.json({ success: true });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: `Backend Error: ${err.message}` });
     }
 });
 
@@ -255,7 +255,7 @@ app.get('/api/bookings', async (req, res) => {
         res.json(mapped);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: `Backend Error: ${err.message}` });
     }
 });
 
@@ -283,7 +283,7 @@ app.post('/api/bookings', async (req, res) => {
         res.status(201).json({ success: true });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: `Backend Error: ${err.message}` });
     }
 });
 
@@ -306,7 +306,7 @@ app.put('/api/bookings/:id', async (req, res) => {
         res.json({ success: true });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: `Backend Error: ${err.message}` });
     }
 });
 
@@ -316,7 +316,7 @@ app.delete('/api/bookings/:id', async (req, res) => {
         res.json({ success: true });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: `Backend Error: ${err.message}` });
     }
 });
 
@@ -330,7 +330,7 @@ app.get('/api/settings', async (req, res) => {
         res.json(rows[0].setting_value);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: `Backend Error: ${err.message}` });
     }
 });
 
@@ -343,7 +343,7 @@ app.put('/api/settings', async (req, res) => {
         res.json({ success: true });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: `Backend Error: ${err.message}` });
     }
 });
 
