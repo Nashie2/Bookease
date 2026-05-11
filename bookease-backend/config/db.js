@@ -16,6 +16,10 @@ const pool = mysql.createPool({
     }
 });
 
+// Debug: Verify environment variables (Hiding sensitive info)
+console.log('Connecting to Database Host:', process.env.DB_HOST || 'localhost');
+console.log('Using Port:', process.env.DB_PORT || 3306);
+
 // Convert pool to use promises
 const promisePool = pool.promise();
 
