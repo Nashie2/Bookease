@@ -141,7 +141,7 @@ app.post('/api/auth/social', async (req, res) => {
         // Create new user
         await db.query(
             'INSERT INTO users (id, first_name, last_name, email, role, avatar) VALUES (?, ?, ?, ?, ?, ?)',
-            [id, first, last, email, role || 'user', avatar]
+            [id, first || 'User', last || '', email, role || 'user', avatar || null]
         );
         
         res.status(201).json({ id, first, last, email, role: role || 'user', avatar });
