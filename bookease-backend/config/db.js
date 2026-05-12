@@ -11,10 +11,8 @@ const pool = mysql.createPool({
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
-    connectTimeout: 10000,
-    ssl: {
-        rejectUnauthorized: false
-    }
+    connectTimeout: 10000
+    // ssl: { rejectUnauthorized: false } // Removed for Railway compatibility
 });
 
 // Debug: Verify environment variables (Hiding sensitive info)
