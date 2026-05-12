@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { useApp } from '../context/AppContext'
 import { toast } from '../hooks/useToast'
 import { auth, googleProvider } from '../utils/firebase'
-import { signInWithPopup } from 'firebase/auth'
+import { signInWithPopup, signInWithRedirect } from 'firebase/auth'
 
 const DEMO_ACCOUNTS = [
 
