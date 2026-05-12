@@ -2,11 +2,11 @@
 //  AuthScreen — Login + Registration for users and admins
 // ============================================================
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useApp } from '../context/AppContext'
 import { toast } from '../hooks/useToast'
 import { auth, googleProvider } from '../utils/firebase'
-import { signInWithPopup, signInWithRedirect } from 'firebase/auth'
+import { signInWithPopup, signInWithRedirect, getRedirectResult } from 'firebase/auth'
 
 const DEMO_ACCOUNTS = [
 
@@ -18,6 +18,39 @@ export default function AuthScreen({ hint, onBack }) {
   const [isAdmin, setIsAdmin] = useState(hint === 'admin')
   const [tab, setTab] = useState('login')          // 'login' | 'register'
   const [form, setForm] = useState({ first: '', last: '', email: '', password: '', confirm: '', phone: '' })
+
+  // Handle the redirect result when the page loads
+  useEffect(() => {
+    getRedirectResult(auth).then(async (result) => {
+      if (result) {
+        const user = result.user
+        try {
+          const res = await fetch('/api/auth/social', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: user.uid,
+              email: user.email,
+              first: user.displayName?.split(' ')[0] || 'User',
+              last: user.displayName?.split(' ').slice(1).join(' ') || '',
+              avatar: user.photoURL,
+              role: 'user'
+            })
+          })
+          if (res.ok) {
+            const localUser = await res.json()
+            toast(`Welcome, ${localUser.first}! ✦`)
+            login(localUser)
+          }
+        } catch (err) {
+          console.error('Social Sync Error:', err)
+          toast('Social login sync failed')
+        }
+      }
+    }).catch((err) => {
+      console.error('Redirect Result Error:', err)
+    })
+  }, [])
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
 
