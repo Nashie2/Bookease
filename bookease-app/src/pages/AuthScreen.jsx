@@ -15,6 +15,9 @@ const DEMO_ACCOUNTS = [
 export default function AuthScreen({ hint, onBack }) {
   const { login, db } = useApp()
 
+  const [isAdmin, setIsAdmin] = useState(hint === 'admin')
+  const [tab, setTab] = useState('login')          // 'login' | 'register'
+  const [form, setForm] = useState({ first: '', last: '', email: '', password: '', confirm: '', phone: '' })
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
 
