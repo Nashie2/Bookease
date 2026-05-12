@@ -4,14 +4,14 @@ require('dotenv').config();
 // Create a direct connection instead of a pool for testing
 async function getConnection() {
     const config = {
-        host: process.env.DB_HOST || 'localhost',
-        port: Number(process.env.DB_PORT) || 3306,
+        host: process.env.DB_HOST || 'yamabiko.proxy.rlwy.net',
+        port: Number(process.env.DB_PORT) || 27533,
         user: process.env.DB_USER || 'root',
-        password: process.env.DB_PASSWORD || '',
+        password: process.env.DB_PASSWORD || 'SNnnkhJRlflgzzrfZemxEZUfORwjJPTe',
         database: process.env.DB_NAME || 'railway',
         connectTimeout: 20000 // 20 seconds
     };
-    
+
     console.log('Attempting direct connection to:', config.host, 'Port:', config.port);
     return await mysql.createConnection(config);
 }
