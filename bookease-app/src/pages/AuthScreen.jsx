@@ -21,42 +21,53 @@ export default function AuthScreen({ hint, onBack }) {
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
 
-  async function handleGoogleLogin() {
-    setLoading(true)
-    try {
-      // Force Google to show the account picker
-      googleProvider.setCustomParameters({ prompt: 'select_account' });
-      
-      const result = await signInWithPopup(auth, googleProvider)
-      const user = result.user
-
-      // Sync with our backend
-      const res = await fetch('/api/auth/social', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: user.uid,
-          email: user.email,
-          first: user.displayName?.split(' ')[0] || 'User',
-          last: user.displayName?.split(' ').slice(1).join(' ') || '',
-          avatar: user.photoURL,
-          role: 'user' 
-        })
-      })
-
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}))
-        throw new Error(errData.error || 'Failed to sync with backend')
+  // 1. Handle the "Return" from Google (The most important part!)
+  useEffect(() => {
+    getRedirectResult(auth).then(async (result) => {
+      if (result) {
+        setLoading(true);
+        const user = result.user;
+        try {
+          const res = await fetch('/api/auth/social', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: user.uid,
+              email: user.email,
+              first: user.displayName?.split(' ')[0] || 'User',
+              last: user.displayName?.split(' ').slice(1).join(' ') || '',
+              avatar: user.photoURL,
+              role: 'user'
+            })
+          });
+          if (res.ok) {
+            const localUser = await res.json();
+            toast(`Welcome back, ${localUser.first}! ✦`);
+            login(localUser);
+          }
+        } catch (err) {
+          console.error(err);
+          toast('Social login failed to sync');
+        } finally {
+          setLoading(false);
+        }
       }
+    }).catch((err) => {
+      console.error('Redirect Error:', err);
+    });
+  }, []);
 
-      const localUser = await res.json()
-      toast(`Welcome, ${localUser.first}! ✦`)
-      login(localUser)
+  async function handleGoogleLogin() {
+    try {
+      setLoading(true);
+      // Force account picker
+      googleProvider.setCustomParameters({ prompt: 'select_account' });
+      // Redirect to Google (No popups = no blocks!)
+      await signInWithRedirect(auth, googleProvider);
     } catch (err) {
-      console.error(err)
-      toast(err.message || 'Google Login failed')
-    } finally {
-      setLoading(false)
+      console.error(err);
+      toast(err.message || 'Google Login failed');
+      setLoading(false);
     }
   }
 
