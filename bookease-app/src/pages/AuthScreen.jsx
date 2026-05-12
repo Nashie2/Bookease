@@ -24,31 +24,7 @@ export default function AuthScreen({ hint, onBack }) {
   async function handleGoogleLogin() {
     setLoading(true)
     try {
-      const result = await signInWithPopup(auth, googleProvider)
-      const user = result.user
-
-      // Sync with our backend
-      const res = await fetch('/api/auth/social', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: user.uid,
-          email: user.email,
-          first: user.displayName?.split(' ')[0] || 'User',
-          last: user.displayName?.split(' ').slice(1).join(' ') || '',
-          avatar: user.photoURL,
-          role: 'user' 
-        })
-      })
-
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}))
-        throw new Error(errData.error || 'Failed to sync with backend')
-      }
-
-      const localUser = await res.json()
-      toast(`Welcome, ${localUser.first}! ✦`)
-      login(localUser)
+      await signInWithRedirect(auth, googleProvider)
     } catch (err) {
       console.error(err)
       toast(err.message || 'Google Login failed')
