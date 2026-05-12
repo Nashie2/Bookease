@@ -15,49 +15,40 @@ const DEMO_ACCOUNTS = [
 export default function AuthScreen({ hint, onBack }) {
   const { login, db } = useApp()
 
-  const [isAdmin, setIsAdmin] = useState(hint === 'admin')
-  const [tab, setTab] = useState('login')          // 'login' | 'register'
-  const [form, setForm] = useState({ first: '', last: '', email: '', password: '', confirm: '', phone: '' })
-
-  // Handle the redirect result when the page loads
-  useEffect(() => {
-    getRedirectResult(auth).then(async (result) => {
-      if (result) {
-        const user = result.user
-        try {
-          const res = await fetch('/api/auth/social', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              id: user.uid,
-              email: user.email,
-              first: user.displayName?.split(' ')[0] || 'User',
-              last: user.displayName?.split(' ').slice(1).join(' ') || '',
-              avatar: user.photoURL,
-              role: 'user'
-            })
-          })
-          if (res.ok) {
-            const localUser = await res.json()
-            toast(`Welcome, ${localUser.first}! ✦`)
-            login(localUser)
-          }
-        } catch (err) {
-          console.error('Social Sync Error:', err)
-          toast('Social login sync failed')
-        }
-      }
-    }).catch((err) => {
-      console.error('Redirect Result Error:', err)
-    })
-  }, [])
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
 
   async function handleGoogleLogin() {
     setLoading(true)
     try {
-      await signInWithRedirect(auth, googleProvider)
+      // Force Google to show the account picker
+      googleProvider.setCustomParameters({ prompt: 'select_account' });
+      
+      const result = await signInWithPopup(auth, googleProvider)
+      const user = result.user
+
+      // Sync with our backend
+      const res = await fetch('/api/auth/social', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: user.uid,
+          email: user.email,
+          first: user.displayName?.split(' ')[0] || 'User',
+          last: user.displayName?.split(' ').slice(1).join(' ') || '',
+          avatar: user.photoURL,
+          role: 'user' 
+        })
+      })
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}))
+        throw new Error(errData.error || 'Failed to sync with backend')
+      }
+
+      const localUser = await res.json()
+      toast(`Welcome, ${localUser.first}! ✦`)
+      login(localUser)
     } catch (err) {
       console.error(err)
       toast(err.message || 'Google Login failed')
