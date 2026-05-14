@@ -24,11 +24,17 @@ export default function AuthScreen({ hint, onBack }) {
   // The redirect logic has been moved to AppContext.jsx to ensure it runs globally on load
 
   async function handleGoogleLogin() {
+    // 1. Setup provider synchronously
+    googleProvider.setCustomParameters({ prompt: 'select_account' });
+    
+    // 2. Trigger popup IMMEDIATELY (Do not use await or set state before this line to avoid popup blockers!)
+    const popupPromise = signInWithPopup(auth, googleProvider);
+    
+    // 3. Now we can set loading state while we await the popup
+    setLoading(true);
+
     try {
-      setLoading(true);
-      googleProvider.setCustomParameters({ prompt: 'select_account' });
-      // Use Popup instead of Redirect to prevent browser cookie blocking and page reloads
-      const result = await signInWithPopup(auth, googleProvider);
+      const result = await popupPromise;
       
       // Process the login immediately without waiting for a page reload
       const user = result.user;
