@@ -127,8 +127,13 @@ app.post('/api/auth/login', async (req, res) => {
 app.post('/api/auth/social', async (req, res) => {
     const { id, email, first, last, avatar, role } = req.body;
     try {
+        // Safely ensure avatar column exists (fixes "Unknown column" errors dynamically)
+        try {
+            await db.query('ALTER TABLE users ADD COLUMN avatar VARCHAR(255) DEFAULT NULL');
+        } catch (e) { /* Column likely exists, ignore error */ }
+
         // Check if user exists
-        const [rows] = await db.query('SELECT id, first_name AS first, last_name AS last, email, role, phone, avatar FROM users WHERE email = ?', [email]);
+        const [rows] = await db.query('SELECT id, first_name AS first, last_name AS last, email, role, phone, avatar FROM users WHERE email = ? OR id = ?', [email, id]);
         
         if (rows.length > 0) {
             // Update avatar if changed
@@ -138,13 +143,16 @@ app.post('/api/auth/social', async (req, res) => {
             return res.json({ ...rows[0], avatar: avatar || rows[0].avatar });
         }
 
+        // Ensure id is truncated if it exceeds standard varchar limits just in case, but usually 28 chars is fine
+        const safeId = id.substring(0, 50);
+
         // Create new user
         await db.query(
             'INSERT INTO users (id, first_name, last_name, email, role, avatar, password_hash, phone) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-            [id, first || 'User', last || '', email, role || 'user', avatar || null, 'social_login', '']
+            [safeId, first || 'User', last || '', email, role || 'client', avatar || null, 'social_login', '']
         );
         
-        res.status(201).json({ id, first, last, email, role: role || 'user', avatar });
+        res.status(201).json({ id: safeId, first, last, email, role: role || 'client', avatar });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: `Backend Error: ${err.message}` });

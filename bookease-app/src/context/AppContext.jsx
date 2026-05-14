@@ -77,11 +77,15 @@ export function AppProvider({ children }) {
               saveSession(localUser.id, token);
               setCurrentUser(localUser);
             } else {
-              console.error('Social login backend error:', await res.text());
+              const errText = await res.text();
+              console.error('Social login backend error:', errText);
+              // Show toast so the user knows why it failed!
+              setTimeout(() => alert('Backend Error: ' + errText), 500); 
             }
           }
         } catch (err) {
           console.error("Redirect Error:", err);
+          setTimeout(() => alert('Google Sign-In Error: ' + err.message), 500);
         }
       }
       setAuthLoaded(true)
