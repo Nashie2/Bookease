@@ -44,10 +44,14 @@ export default function AuthScreen({ hint, onBack }) {
             const localUser = await res.json();
             toast(`Welcome back, ${localUser.first}! ✦`);
             login(localUser);
+          } else {
+            const errData = await res.json();
+            console.error('Server error:', errData);
+            toast(errData.error || 'Social login failed to sync with server');
           }
         } catch (err) {
           console.error(err);
-          toast('Social login failed to sync');
+          toast('Network error during social login sync');
         } finally {
           setLoading(false);
         }
