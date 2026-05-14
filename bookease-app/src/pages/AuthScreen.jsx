@@ -26,13 +26,38 @@ export default function AuthScreen({ hint, onBack }) {
   async function handleGoogleLogin() {
     try {
       setLoading(true);
-      // Force account picker
       googleProvider.setCustomParameters({ prompt: 'select_account' });
-      // Redirect to Google (No popups = no blocks!)
-      await signInWithRedirect(auth, googleProvider);
+      // Use Popup instead of Redirect to prevent browser cookie blocking and page reloads
+      const result = await signInWithPopup(auth, googleProvider);
+      
+      // Process the login immediately without waiting for a page reload
+      const user = result.user;
+      const res = await fetch('/api/auth/social', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: user.uid,
+          email: user.email,
+          first: user.displayName?.split(' ')[0] || 'User',
+          last: user.displayName?.split(' ').slice(1).join(' ') || '',
+          avatar: user.photoURL,
+          role: 'user'
+        })
+      });
+
+      if (res.ok) {
+        const localUser = await res.json();
+        toast(`Welcome back, ${localUser.first}! ✦`);
+        login(localUser); // Instantly triggers redirect to UserPortal!
+      } else {
+        const errText = await res.text();
+        console.error('Social login backend error:', errText);
+        toast('Backend Error: ' + errText);
+      }
     } catch (err) {
       console.error(err);
       toast(err.message || 'Google Login failed');
+    } finally {
       setLoading(false);
     }
   }
