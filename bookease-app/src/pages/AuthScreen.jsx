@@ -58,6 +58,8 @@ export default function AuthScreen({ hint, onBack }) {
       }
     }).catch((err) => {
       console.error('Redirect Error:', err);
+      toast(err.message || 'Error returning from Google Sign-In');
+      setLoading(false);
     });
   }, []);
 
