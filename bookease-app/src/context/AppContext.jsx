@@ -5,7 +5,7 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { loadSession, saveSession, clearSession, createToken } from '../utils/auth'
 import { auth } from '../utils/firebase'
-import { getRedirectResult, signOut } from 'firebase/auth'
+import { getRedirectResult, onAuthStateChanged, signOut } from 'firebase/auth'
 
 const AppContext = createContext(null)
 
@@ -40,12 +40,14 @@ export function AppProvider({ children }) {
 
       // 2. Restore session
       const session = loadSession()
+      let sessionRestored = false;
       if (session) {
         try {
           const res = await fetch(`/api/users/${session.userId}`);
           if (res.ok) {
             const user = await res.json();
             setCurrentUser(user);
+            sessionRestored = true;
           } else {
             clearSession();
           }
@@ -54,8 +56,60 @@ export function AppProvider({ children }) {
         }
       }
 
+      // 3. Fallback to Firebase auth state if no active backend session
+      if (!sessionRestored) {
+        // A) First try redirect result
+        try {
+          const result = await getRedirectResult(auth);
+          if (result) {
+            const user = result.user;
+            await syncGoogleUser(user);
+          }
+        } catch (err) {
+          console.error("Redirect Error:", err);
+          setTimeout(() => alert('Google Redirect Error: ' + err.message), 500);
+        }
+
+        // B) Continuous fallback listener
+        onAuthStateChanged(auth, async (user) => {
+          if (user && !currentUser) {
+            await syncGoogleUser(user);
+          }
+        });
+      }
+
       setAuthLoaded(true)
     }
+
+    async function syncGoogleUser(user) {
+      try {
+        const res = await fetch('/api/auth/social', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: user.uid,
+            email: user.email,
+            first: user.displayName?.split(' ')[0] || 'User',
+            last: user.displayName?.split(' ').slice(1).join(' ') || '',
+            avatar: user.photoURL,
+            role: 'client'
+          })
+        });
+        if (res.ok) {
+          const localUser = await res.json();
+          const token = createToken(localUser);
+          saveSession(localUser.id, token);
+          setCurrentUser(localUser);
+        } else {
+          const errText = await res.text();
+          console.error('Social login backend error:', errText);
+          alert('Backend Error: ' + errText);
+        }
+      } catch (err) {
+        console.error("Auth sync error:", err);
+      }
+    }
+
     init()
   }, [])
 

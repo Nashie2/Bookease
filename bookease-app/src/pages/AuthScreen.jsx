@@ -24,46 +24,14 @@ export default function AuthScreen({ hint, onBack }) {
   // The redirect logic has been moved to AppContext.jsx to ensure it runs globally on load
 
   async function handleGoogleLogin() {
-    // 1. Setup provider synchronously
-    googleProvider.setCustomParameters({ prompt: 'select_account' });
-    
-    // 2. Trigger popup IMMEDIATELY (Do not use await or set state before this line to avoid popup blockers!)
-    const popupPromise = signInWithPopup(auth, googleProvider);
-    
-    // 3. Now we can set loading state while we await the popup
-    setLoading(true);
-
     try {
-      const result = await popupPromise;
-      
-      // Process the login immediately without waiting for a page reload
-      const user = result.user;
-      const res = await fetch('/api/auth/social', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: user.uid,
-          email: user.email,
-          first: user.displayName?.split(' ')[0] || 'User',
-          last: user.displayName?.split(' ').slice(1).join(' ') || '',
-          avatar: user.photoURL,
-          role: 'user'
-        })
-      });
-
-      if (res.ok) {
-        const localUser = await res.json();
-        toast(`Welcome back, ${localUser.first}! ✦`);
-        login(localUser); // Instantly triggers redirect to UserPortal!
-      } else {
-        const errText = await res.text();
-        console.error('Social login backend error:', errText);
-        toast('Backend Error: ' + errText);
-      }
+      setLoading(true);
+      googleProvider.setCustomParameters({ prompt: 'select_account' });
+      // Reverting to Redirect because Popups are hard-blocked by the user's browser/environment
+      await signInWithRedirect(auth, googleProvider);
     } catch (err) {
       console.error(err);
       toast(err.message || 'Google Login failed');
-    } finally {
       setLoading(false);
     }
   }
