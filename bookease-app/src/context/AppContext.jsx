@@ -4,6 +4,8 @@
 
 import { createContext, useContext, useState, useEffect } from 'react'
 import { loadSession, saveSession, clearSession, createToken } from '../utils/auth'
+import { auth } from '../utils/firebase'
+import { getRedirectResult } from 'firebase/auth'
 
 const AppContext = createContext(null)
 
@@ -49,6 +51,37 @@ export function AppProvider({ children }) {
           }
         } catch (e) {
           console.error("Failed to restore session from backend", e);
+        }
+      } else {
+        // 3. Check for Google Redirect Result if no active session
+        try {
+          const result = await getRedirectResult(auth);
+          if (result) {
+            const user = result.user;
+            const res = await fetch('/api/auth/social', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                id: user.uid,
+                email: user.email,
+                first: user.displayName?.split(' ')[0] || 'User',
+                last: user.displayName?.split(' ').slice(1).join(' ') || '',
+                avatar: user.photoURL,
+                role: 'user'
+              })
+            });
+            if (res.ok) {
+              const localUser = await res.json();
+              // Log the user in directly (bypassing the login function to avoid dependency issues in init)
+              const token = createToken(localUser);
+              saveSession(localUser.id, token);
+              setCurrentUser(localUser);
+            } else {
+              console.error('Social login backend error:', await res.text());
+            }
+          }
+        } catch (err) {
+          console.error("Redirect Error:", err);
         }
       }
       setAuthLoaded(true)

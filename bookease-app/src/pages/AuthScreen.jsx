@@ -21,47 +21,7 @@ export default function AuthScreen({ hint, onBack }) {
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
 
-  // 1. Handle the "Return" from Google (The most important part!)
-  useEffect(() => {
-    getRedirectResult(auth).then(async (result) => {
-      if (result) {
-        setLoading(true);
-        const user = result.user;
-        try {
-          const res = await fetch('/api/auth/social', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              id: user.uid,
-              email: user.email,
-              first: user.displayName?.split(' ')[0] || 'User',
-              last: user.displayName?.split(' ').slice(1).join(' ') || '',
-              avatar: user.photoURL,
-              role: 'user'
-            })
-          });
-          if (res.ok) {
-            const localUser = await res.json();
-            toast(`Welcome back, ${localUser.first}! ✦`);
-            login(localUser);
-          } else {
-            const errData = await res.json();
-            console.error('Server error:', errData);
-            toast(errData.error || 'Social login failed to sync with server');
-          }
-        } catch (err) {
-          console.error(err);
-          toast('Network error during social login sync');
-        } finally {
-          setLoading(false);
-        }
-      }
-    }).catch((err) => {
-      console.error('Redirect Error:', err);
-      toast(err.message || 'Error returning from Google Sign-In');
-      setLoading(false);
-    });
-  }, []);
+  // The redirect logic has been moved to AppContext.jsx to ensure it runs globally on load
 
   async function handleGoogleLogin() {
     try {
