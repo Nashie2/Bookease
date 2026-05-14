@@ -92,7 +92,7 @@ export function AppProvider({ children }) {
             first: user.displayName?.split(' ')[0] || 'User',
             last: user.displayName?.split(' ').slice(1).join(' ') || '',
             avatar: user.photoURL,
-            role: 'client'
+            role: 'user'
           })
         });
         if (res.ok) {

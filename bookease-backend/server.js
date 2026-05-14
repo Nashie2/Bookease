@@ -149,10 +149,10 @@ app.post('/api/auth/social', async (req, res) => {
         // Create new user
         await db.query(
             'INSERT INTO users (id, first_name, last_name, email, role, avatar, password_hash, phone) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-            [safeId, first || 'User', last || '', email, role || 'client', avatar || null, 'social_login', '']
+            [safeId, first || 'User', last || '', email, role === 'client' ? 'user' : (role || 'user'), avatar || null, 'social_login', '']
         );
         
-        res.status(201).json({ id: safeId, first, last, email, role: role || 'client', avatar });
+        res.status(201).json({ id: safeId, first, last, email, role: role === 'client' ? 'user' : (role || 'user'), avatar });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: `Backend Error: ${err.message}` });
