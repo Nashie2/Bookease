@@ -5,7 +5,7 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { loadSession, saveSession, clearSession, createToken } from '../utils/auth'
 import { auth } from '../utils/firebase'
-import { getRedirectResult } from 'firebase/auth'
+import { getRedirectResult, onAuthStateChanged, signOut } from 'firebase/auth'
 
 const AppContext = createContext(null)
 
@@ -40,54 +40,56 @@ export function AppProvider({ children }) {
 
       // 2. Restore session
       const session = loadSession()
+      let sessionRestored = false;
       if (session) {
         try {
           const res = await fetch(`/api/users/${session.userId}`);
           if (res.ok) {
             const user = await res.json();
             setCurrentUser(user);
+            sessionRestored = true;
           } else {
             clearSession();
           }
         } catch (e) {
           console.error("Failed to restore session from backend", e);
         }
-      } else {
-        // 3. Check for Google Redirect Result if no active session
-        try {
-          const result = await getRedirectResult(auth);
-          if (result) {
-            const user = result.user;
-            const res = await fetch('/api/auth/social', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                id: user.uid,
-                email: user.email,
-                first: user.displayName?.split(' ')[0] || 'User',
-                last: user.displayName?.split(' ').slice(1).join(' ') || '',
-                avatar: user.photoURL,
-                role: 'user'
-              })
-            });
-            if (res.ok) {
-              const localUser = await res.json();
-              // Log the user in directly (bypassing the login function to avoid dependency issues in init)
-              const token = createToken(localUser);
-              saveSession(localUser.id, token);
-              setCurrentUser(localUser);
-            } else {
-              const errText = await res.text();
-              console.error('Social login backend error:', errText);
-              // Show toast so the user knows why it failed!
-              setTimeout(() => alert('Backend Error: ' + errText), 500); 
+      }
+
+      // 3. Fallback to Firebase auth state if no active backend session
+      if (!sessionRestored) {
+        onAuthStateChanged(auth, async (user) => {
+          if (user && !currentUser) {
+            try {
+              const res = await fetch('/api/auth/social', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  id: user.uid,
+                  email: user.email,
+                  first: user.displayName?.split(' ')[0] || 'User',
+                  last: user.displayName?.split(' ').slice(1).join(' ') || '',
+                  avatar: user.photoURL,
+                  role: 'client'
+                })
+              });
+              if (res.ok) {
+                const localUser = await res.json();
+                const token = createToken(localUser);
+                saveSession(localUser.id, token);
+                setCurrentUser(localUser);
+              } else {
+                const errText = await res.text();
+                console.error('Social login backend error:', errText);
+                alert('Backend Error: ' + errText);
+              }
+            } catch (err) {
+              console.error("Auth sync error:", err);
             }
           }
-        } catch (err) {
-          console.error("Redirect Error:", err);
-          setTimeout(() => alert('Google Sign-In Error: ' + err.message), 500);
-        }
+        });
       }
+      
       setAuthLoaded(true)
     }
     init()
@@ -99,9 +101,14 @@ export function AppProvider({ children }) {
     setCurrentUser(user)
   }
 
-  function logout() {
+  async function logout() {
     clearSession()
     setCurrentUser(null)
+    try {
+      await signOut(auth)
+    } catch (err) {
+      console.error("Firebase logout error:", err)
+    }
   }
 
   // Intercept dispatches and route to backend
