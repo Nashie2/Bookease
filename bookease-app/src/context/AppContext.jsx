@@ -12,7 +12,7 @@ const AppContext = createContext(null)
 export function AppProvider({ children }) {
   const [db, setDb] = useState({ services: [], bookings: [], settings: {}, users: [] })
   const [currentUser, setCurrentUser] = useState(null)
-  const [authLoaded, setAuthLoaded]   = useState(false)
+  const [authLoaded, setAuthLoaded] = useState(false)
   const [dbLoaded, setDbLoaded] = useState(false)
 
   // Initial load
@@ -26,7 +26,7 @@ export function AppProvider({ children }) {
           fetch('/api/settings'),
           fetch('/api/users')
         ])
-        
+
         const services = servRes.ok ? await servRes.json() : []
         const bookings = bookRes.ok ? await bookRes.json() : []
         const settings = setRes.ok ? await setRes.json() : {}
@@ -70,7 +70,7 @@ export function AppProvider({ children }) {
                   first: user.displayName?.split(' ')[0] || 'User',
                   last: user.displayName?.split(' ').slice(1).join(' ') || '',
                   avatar: user.photoURL,
-                  role: 'client'
+                  role: 'user'
                 })
               });
               if (res.ok) {
@@ -89,7 +89,7 @@ export function AppProvider({ children }) {
           }
         });
       }
-      
+
       setAuthLoaded(true)
     }
     init()
@@ -168,7 +168,7 @@ export function AppProvider({ children }) {
             setCurrentUser(prev => ({ ...prev, ...action.payload }))
           }
           break
-          
+
         case 'UPDATE_SETTINGS':
           await fetch('/api/settings', {
             method: 'PUT',
@@ -177,7 +177,7 @@ export function AppProvider({ children }) {
           })
           setDb(prev => ({ ...prev, settings: { ...prev.settings, ...action.payload } }))
           break
-          
+
         case 'ADD_USER':
           setDb(prev => ({ ...prev, users: [...prev.users, action.payload] }))
           break
@@ -189,7 +189,7 @@ export function AppProvider({ children }) {
 
   // Show a loading screen until both DB and Auth are loaded
   if (!dbLoaded || !authLoaded) {
-    return <div style={{height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>Loading BookEase...</div>
+    return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading BookEase...</div>
   }
 
   return (
